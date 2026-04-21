@@ -1,5 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.yxatabl.entities.Book;
+import com.yxatabl.exceptions.AddingExistingBookException;
+import com.yxatabl.exceptions.RemovingNonExistingBookException;
 import com.yxatabl.repositories.BookRepository;
 import com.yxatabl.utils.Stats;
 
@@ -21,20 +24,40 @@ public class BookRepositoryTests {
     }
 
     @Test
-    public void checkBookCreate() {
+    public void checkBookCreate() throws AddingExistingBookException {
         Book book = repository.createBook("Title", "Author", 2026);
+        
         assertTrue(repository.getAllBooks().contains(book));
     }
 
     @Test
-    public void checkRemoveBook() {
+    public void checkBookCreateBad() throws AddingExistingBookException {
+        repository.createBook("Title", "Author", 2026);
+
+        assertThrows(AddingExistingBookException.class, () -> {
+            repository.createBook("Title", "Author", 2026);
+        });
+    }
+
+    @Test
+    public void checkRemoveBook() throws AddingExistingBookException, RemovingNonExistingBookException {
         Book book = repository.createBook("Title", "Author", 2026);
         repository.removeBook(book.id());
+        
         assertFalse(repository.getAllBooks().contains(book));
     }
 
     @Test
-    public void checkGetAllBooks() {
+    public void checkRemoveBookBad() throws AddingExistingBookException {
+        Book book = repository.createBook("Title", "Author", 2026);
+        
+        assertThrows(RemovingNonExistingBookException.class, () -> {
+            repository.removeBook(book.id()+1);
+        });
+    }
+
+    @Test
+    public void checkGetAllBooks() throws AddingExistingBookException {
         Book book1 = repository.createBook("Title1", "Author1", 2026);
         Book book2 = repository.createBook("Title2", "Author2", 2026);
         
@@ -43,7 +66,7 @@ public class BookRepositoryTests {
     }
 
     @Test
-    public void checkFindBooks() {
+    public void checkFindBooks() throws AddingExistingBookException {
         repository.createBook("Super Book", "Lev Tolstoy", 2026);
         repository.createBook("Good One", "Lev", 2027);
         repository.createBook("Amazing book", "Nikolay Tolstoy", 2028);
@@ -63,7 +86,7 @@ public class BookRepositoryTests {
     }
     
     @Test
-    public void checkStats() {
+    public void checkStats() throws AddingExistingBookException {
         Book book1 = repository.createBook("Title1", "Author1", 2026);
         repository.createBook("Title2", "Author1", 2027);
         repository.createBook("Title1", "Author2", 2028);

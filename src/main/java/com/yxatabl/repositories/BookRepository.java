@@ -9,24 +9,42 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.yxatabl.entities.Book;
+import com.yxatabl.exceptions.AddingExistingBookException;
+import com.yxatabl.exceptions.RemovingNonExistingBookException;
 import com.yxatabl.utils.AuthorStats;
 import com.yxatabl.utils.Stats;
 
 public class BookRepository {
     private final Map<Integer, Book> books;
 
+    private boolean bookExists(String title, String author) {
+        return books.values().stream()
+            .anyMatch(book -> book.author().equals(author) && book.title().equals(title));
+    }
+
     public BookRepository() {
         this.books = new HashMap<>();
     }
 
-    public Book createBook(String title, String author, Integer year) {
+    public Book createBook(String title, String author, Integer year) throws AddingExistingBookException {
+        if (bookExists(title, author)) {
+            throw new AddingExistingBookException("Данная книга уже добавлена");
+        }
+
         Book book = new Book(books.size(), title, author, year);
         books.put(books.size(), book);
+
         return book;
     }
 
-    public void removeBook(Integer id) {
-        books.remove(id);
+    public Book removeBook(Integer id) throws RemovingNonExistingBookException {
+        Book book = books.remove(id);
+        
+        if (book == null) {
+            throw new RemovingNonExistingBookException("Попытка удалить несуществующую книгу");
+        }
+
+        return book;
     }
 
     public Collection<Book> getAllBooks() {
