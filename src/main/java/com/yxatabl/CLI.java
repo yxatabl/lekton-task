@@ -38,7 +38,7 @@ public class CLI {
         
         while (true) {
             try {
-                String line = reader.readLine();
+                String line = reader.readLine("books> ");
                 if (line == null || line.trim().isEmpty()) continue;
                 
                 line = line.trim();
@@ -47,7 +47,6 @@ public class CLI {
                 String args = parts.length > 1 ? parts[1] : "";
 
                 if (command.equals("EXIT")) {
-                    terminal.writer().println("До свидания!");
                     break;
                 }
 
@@ -55,7 +54,6 @@ public class CLI {
             } catch (UserInterruptException e) {
                 terminal.writer().println("^C");
             } catch (EndOfFileException e) {
-                terminal.writer().println("\nДо свидания!");
                 break;
             } catch (Exception e) {
                 terminal.writer().println("Ошибка: " + e.getMessage());
@@ -67,8 +65,7 @@ public class CLI {
     private void printWelcome() {
         terminal.writer().println("Система управления библиотекой");
         terminal.writer().println("Доступные команды: ADD, REMOVE, LIST, FIND, STATS, EXIT");
-        terminal.writer().println("Введите HELP для подробной справки");
-        terminal.writer().println("Нажмите TAB для автодополнения, ↑↓ для истории\n");
+        terminal.writer().println("Введите HELP для подробной справки\n");
         terminal.flush();
     }
 
@@ -113,25 +110,19 @@ public class CLI {
         terminal.writer().println("\nСПРАВКА ПО КОМАНДАМ");
         terminal.writer().println("ADD <название>;<автор>;<год>");
         terminal.writer().println("    Пример: ADD Война и мир;Лев Толстой;1869");
-        terminal.writer().println("    Все поля обязательны. Нельзя добавить дубликат.");
-        terminal.writer().println();
+        terminal.writer().println("    Все поля обязательны. Нельзя добавить дубликат.\n");
         terminal.writer().println("REMOVE <id>");
         terminal.writer().println("    Пример: REMOVE 1");
-        terminal.writer().println("    Удаляет книгу по ID и показывает информацию о ней.");
-        terminal.writer().println();
+        terminal.writer().println("    Удаляет книгу по ID и показывает информацию о ней.\n");
         terminal.writer().println("LIST");
-        terminal.writer().println("    Показывает все книги в порядке добавления.");
-        terminal.writer().println();
+        terminal.writer().println("    Показывает все книги в порядке добавления.\n");
         terminal.writer().println("FIND <запрос>");
         terminal.writer().println("    Пример: FIND Толстой");
-        terminal.writer().println("    Поиск по названию и автору (регистронезависимо).");
-        terminal.writer().println();
+        terminal.writer().println("    Поиск по названию и автору (регистронезависимо).\n");
         terminal.writer().println("STATS");
-        terminal.writer().println("    Показывает статистику: всего книг, самая старая/новая, топ-3 авторов.");
-        terminal.writer().println();
+        terminal.writer().println("    Показывает статистику: всего книг, самая старая/новая, топ-3 авторов.\n");
         terminal.writer().println("EXIT");
-        terminal.writer().println("    Завершает программу.");
-        terminal.writer().println();
+        terminal.writer().println("    Завершает программу.\n");
     }
 
     private void handleAdd(String args) throws AddingExistingBookException {
@@ -159,7 +150,7 @@ public class CLI {
         }
 
         Book book = repository.createBook(title, author, year);
-        terminal.writer().println("Книга добавлена: " + book);
+        terminal.writer().println("Книга добавлена: " + formatBook(book));
     }
 
     private void handleRemove(String args) throws RemovingNonExistingBookException {
@@ -175,7 +166,7 @@ public class CLI {
         }
 
         Book removed = repository.removeBook(id);
-        terminal.writer().println("Книга удалена: " + removed);
+        terminal.writer().println("Книга удалена: " + formatBook(removed));
     }
 
     private void handleList() {
@@ -184,7 +175,7 @@ public class CLI {
             terminal.writer().println("Библиотека пуста");
         } else {
             terminal.writer().println("Всего книг: " + books.size());
-            books.forEach(book -> terminal.writer().println("  " + book));
+            books.forEach(book -> terminal.writer().println("  " + formatBook(book)));
         }
     }
 
@@ -198,7 +189,7 @@ public class CLI {
             terminal.writer().println("Книги не найдены");
         } else {
             terminal.writer().println("Найдено " + results.size() + " книг:");
-            results.forEach(book -> terminal.writer().println("  " + book));
+            results.forEach(book -> terminal.writer().println("  " + formatBook(book)));
         }
     }
 
@@ -209,8 +200,8 @@ public class CLI {
         terminal.writer().println("Общее количество книг: " + stats.count());
         
         if (stats.oldestBook() != null) {
-            terminal.writer().println("Самая старая книга: " + stats.oldestBook());
-            terminal.writer().println("Самая новая книга: " + stats.newestBook());
+            terminal.writer().println("Самая старая книга: " + formatBook(stats.oldestBook()));
+            terminal.writer().println("Самая новая книга: " + formatBook(stats.newestBook()));
         } else {
             terminal.writer().println("Самая старая книга: отсутствует");
             terminal.writer().println("Самая новая книга: отсутствует");
@@ -228,6 +219,11 @@ public class CLI {
             }
         }
         terminal.writer().println();
+    }
+
+    private String formatBook(Book book) {
+        return String.format("[%d] %s - %s (%d)",
+            book.id(), book.title(), book.author(), book.year());
     }
 
     private static class CommandsCompleter implements Completer {
