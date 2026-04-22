@@ -27,7 +27,7 @@ public class BookRepositoryTests {
     public void checkBookCreate() throws AddingExistingBookException {
         Book book = repository.createBook("Title", "Author", 2026);
         
-        assertTrue(repository.getAllBooks().contains(book));
+        assertTrue(repository.getAllBooks(null).contains(book));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class BookRepositoryTests {
         Book book = repository.createBook("Title", "Author", 2026);
         repository.removeBook(book.id());
         
-        assertFalse(repository.getAllBooks().contains(book));
+        assertFalse(repository.getAllBooks(null).contains(book));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class BookRepositoryTests {
         Book book1 = repository.createBook("Title1", "Author1", 2026);
         Book book2 = repository.createBook("Title2", "Author2", 2026);
         
-        Collection<Book> result = repository.getAllBooks();
+        Collection<Book> result = repository.getAllBooks(null);
         assertTrue(result.contains(book1) && result.contains(book2));
     }
 

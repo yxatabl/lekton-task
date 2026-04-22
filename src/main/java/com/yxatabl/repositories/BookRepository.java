@@ -3,6 +3,7 @@ package com.yxatabl.repositories;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,15 @@ public class BookRepository {
     private boolean bookExists(String title, String author) {
         return books.values().stream()
             .anyMatch(book -> book.author().equals(author) && book.title().equals(title));
+    }
+
+    private Comparator<Book> getComparator(String sortBy) {
+        return switch (sortBy.toLowerCase()) {
+            case "title" -> Comparator.comparing(Book::title);
+            case "author" -> Comparator.comparing(Book::author);
+            case "year" -> Comparator.comparing(Book::year);
+            default -> Comparator.comparing(Book::id);
+        };
     }
 
     public BookRepository() {
@@ -47,9 +57,12 @@ public class BookRepository {
         return book;
     }
 
-    public Collection<Book> getAllBooks() {
+    public Collection<Book> getAllBooks(String sortBy) {
         Collection<Book> result = books.values();
-        return result;
+
+        return result.stream()
+            .sorted(getComparator(sortBy))
+            .collect(Collectors.toList());
     }
 
     public List<Book> findBooks(String query) {

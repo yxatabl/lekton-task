@@ -82,7 +82,7 @@ public class CLI {
                     handleRemove(args);
                     break;
                 case "LIST":
-                    handleList();
+                    handleList(args);
                     break;
                 case "FIND":
                     handleFind(args);
@@ -169,8 +169,8 @@ public class CLI {
         terminal.writer().println("Книга удалена: " + formatBook(removed));
     }
 
-    private void handleList() {
-        var books = repository.getAllBooks();
+    private void handleList(String sortBy) {
+        var books = repository.getAllBooks(sortBy);
         if (books.isEmpty()) {
             terminal.writer().println("Библиотека пуста");
         } else {
@@ -214,7 +214,7 @@ public class CLI {
         } else {
             int rank = 1;
             for (var author : topAuthors) {
-                terminal.writer().printf("  %d. %s: %d книг(а)%n", 
+                terminal.writer().printf("  %d. %s: %d%n", 
                     rank++, author.author(), author.bookCount());
             }
         }
