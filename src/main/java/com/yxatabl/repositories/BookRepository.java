@@ -24,6 +24,10 @@ public class BookRepository {
     }
 
     private Comparator<Book> getComparator(String sortBy) {
+        if (sortBy == null) {
+            return Comparator.comparing(Book::id);
+        }
+
         return switch (sortBy.toLowerCase()) {
             case "title" -> Comparator.comparing(Book::title);
             case "author" -> Comparator.comparing(Book::author);
